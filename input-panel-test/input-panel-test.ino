@@ -48,7 +48,7 @@ void loop() {
   Serial.print("-" + String(digitalRead(P_SW1_PIN)) + String(digitalRead(P_SW2_PIN)) + String(digitalRead(P_SW3_PIN)) + String(digitalRead(P_SW4_PIN)));
   Serial.println("-" + String(digitalRead(S_SW1_PIN)) + String(digitalRead(S_SW2_PIN)));
 
-  if (digitalRead(S_SW2_PIN) == 0) {
+  if (digitalRead(S_SW1_PIN) == 0 && digitalRead(S_SW2_PIN) == 0) {
     digitalWrite(CTRL_LED_PIN, HIGH);
   } else {
     digitalWrite(CTRL_LED_PIN, LOW);
