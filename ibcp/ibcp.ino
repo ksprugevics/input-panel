@@ -1,4 +1,4 @@
-// Input board communication protocol version 0.1
+// Input board communication protocol version 0.2
 
 // Pins
 const int SW1_PIN = 8;
@@ -30,6 +30,41 @@ bool CH3_ON = false;
 bool CH4_ON = false;
 int POT1_VAL = 0;
 int POT2_VAL = 0;
+
+// Commands
+const String CMD_STATUS      = "STATUS";
+const String CMD_STATUS_SW1  = "STATUS-SW1";
+const String CMD_STATUS_SW2  = "STATUS-SW2";
+const String CMD_STATUS_CH1  = "STATUS-CH-SW1";
+const String CMD_STATUS_CH2  = "STATUS-CH-SW2";
+const String CMD_STATUS_CH3  = "STATUS-CH-SW3";
+const String CMD_STATUS_CH4  = "STATUS-CH-SW4";
+const String CMD_STATUS_POT1 = "STATUS-POT1";
+const String CMD_STATUS_POT2 = "STATUS-POT2";
+
+// Error codes
+const String ERR_UNKNOWN_COMMAND = "E01";
+
+void setup() {
+  Serial.begin(9600);
+  initPins();
+  setupInitStates();
+  while (!Serial) {
+    ; // Wait for serial port to connect
+  }
+}
+
+void loop() {
+  processCommand();
+
+  handleCtrlButtonPress();
+  handleButtonPress();
+  handleSwitches();
+  handleChannelSwitches();
+  handlePotChange();
+
+  delay(25);
+}
 
 void initPins() {
   pinMode(SW1_PIN, INPUT_PULLUP);
@@ -68,9 +103,85 @@ int scalePotValue(int potValue) {
   return 100 - map(potValue, 0, 1023, 0, 100);
 }
 
-void invertCtrlButton() {
-  CTRL_MODE = !CTRL_MODE;
-  digitalWrite(CTRL_LED_PIN, CTRL_MODE);
+void processCommand() {
+  if (!Serial.available()) return;
+
+  String incomingCommand = Serial.readStringUntil("\n");
+  incomingCommand.trim();
+
+  if (incomingCommand == CMD_STATUS) {
+    Serial.println(prepareStatusString());
+  } else if (incomingCommand == CMD_STATUS_SW1) {
+    Serial.println("SW1-" + String(SW1_ON));
+  } else if (incomingCommand == CMD_STATUS_SW2) {
+    Serial.println("SW2-" + String(SW2_ON));
+  } else if (incomingCommand == CMD_STATUS_CH1) {
+    Serial.println("CH-SW1-" + String(CH1_ON));
+  } else if (incomingCommand == CMD_STATUS_CH2) {
+    Serial.println("CH-SW2-" + String(CH2_ON));
+  } else if (incomingCommand == CMD_STATUS_CH3) {
+    Serial.println("CH-SW3-" + String(CH3_ON));
+  } else if (incomingCommand == CMD_STATUS_CH4) {
+    Serial.println("CH-SW4-" + String(CH4_ON));
+  } else if (incomingCommand == CMD_STATUS_POT1) {
+    Serial.println("POT1-" + String(POT1_VAL));
+  } else if (incomingCommand == CMD_STATUS_POT2) {
+    Serial.println("POT2-" + String(POT2_VAL));
+  } else {
+    Serial.println(ERR_UNKNOWN_COMMAND);
+  }
+}
+
+String prepareStatusString() {
+  String status = "";
+  if (SW1_ON) {
+    status += "SW1-1";
+  } else {
+    status += "SW1-0";
+  }
+  status += ";";
+
+  if (SW2_ON) {
+    status += "SW2-1";
+  } else {
+    status += "SW2-0";
+  }
+  status += ";";
+
+  if (CH1_ON) {
+    status += "CH-SW1-1";
+  } else {
+    status += "CH-SW1-0";
+  }
+  status += ";";
+
+  if (CH2_ON) {
+    status += "CH-SW2-1";
+  } else {
+    status += "CH-SW2-0";
+  }
+  status += ";";
+
+  if (CH3_ON) {
+    status += "CH-SW3-1";
+  } else {
+    status += "CH-SW3-0";
+  }
+  status += ";";
+
+  if (CH4_ON) {
+    status += "CH-SW4-1";
+  } else {
+    status += "CH-SW4-0";
+  }
+  status += ";";
+
+  status += "POT1-" + String(POT1_VAL);
+  status += ";";
+
+  status += "POT2-" + String(POT2_VAL);
+
+  return status;
 }
 
 bool handleCtrlButtonPress() {
@@ -78,6 +189,11 @@ bool handleCtrlButtonPress() {
         invertCtrlButton();
         delay(300);
     }
+}
+
+void invertCtrlButton() {
+  CTRL_MODE = !CTRL_MODE;
+  digitalWrite(CTRL_LED_PIN, CTRL_MODE);
 }
 
 void handleButtonPress() {
@@ -167,20 +283,4 @@ void handlePotChange() {
     POT2_VAL = pot2;
     Serial.println("POT2-" + String(pot2));
   }
-}
-
-void setup() {
-  Serial.begin(9600);
-  initPins();
-  setupInitStates();
-}
-
-void loop() {
-  handleCtrlButtonPress();
-  handleButtonPress();
-  handleSwitches();
-  handleChannelSwitches();
-  handlePotChange();
-
-  delay(25);
 }

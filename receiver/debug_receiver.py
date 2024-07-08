@@ -107,6 +107,10 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, lambda sig, frame: graceful_exit(sig, frame, rec))
 
+    # Need the arduino to wake up
+    time.sleep(3)
+    print(rec.writeAndWaitForResponse("STATUS-SW1"))
+
     while True:
         time.sleep(0.025)
         message = rec.listen()
