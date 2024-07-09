@@ -1,4 +1,4 @@
-from ibcpcom import IbcpCom
+from ibcp_com import IbcpCom
 from board import Board
 import signal
 import time
@@ -104,22 +104,22 @@ def graceful_exit(signal, frame, comms):
     exit(0)
 
 if __name__ == "__main__":
-    comms = IbcpCom()
-    print("Waiting a bit for connection to establish...")
-    time.sleep(3)
-    signal.signal(signal.SIGINT, lambda sig, frame: graceful_exit(sig, frame, comms))
+    with IbcpCom() as comms:
+        print("Waiting a bit for connection to establish...")
+        time.sleep(3)
+        signal.signal(signal.SIGINT, lambda sig, frame: graceful_exit(sig, frame, comms))
 
-    initialStatus = comms.sendCommandAndAwaitResponse("STATUS")
-    print(f"Initial state:\n{initialStatus}")
+        initialStatus = comms.send_command_and_await_response("STATUS")
+        print(f"Initial state:\n{initialStatus}")
 
-    board = Board(initialStatus)
-    initializeHandlers(board)
+        board = Board(initialStatus)
+        initializeHandlers(board)
+        
+        while True:
+            time.sleep(0.025)
+            message = comms.listen()
+            if message is None or not message:
+                continue
 
-    while True:
-        time.sleep(0.025)
-        message = comms.listen()
-        if message is None or not message:
-            continue
-
-        board.parseMessage(message)
-        # print(board)
+            board.parseMessage(message)
+            # print(board)
