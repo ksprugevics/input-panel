@@ -1,8 +1,8 @@
 import serial
 import time
 
-# Receiver for IBCP version 0.2
-class Receiver:
+# Communicator for IBCP version 0.2
+class IbcpCom:
 
     _ARDUINO_PORT = 'COM3'
     _BAUD_RATE = 9600
@@ -40,19 +40,19 @@ class Receiver:
             print(f"Serial communication error: {e}")
             return None
 
-    def write(self, msg):
+    def sendCommand(self, cmd):
         try:
             if self.serial_connection and self.serial_connection.isOpen():
-                self.serial_connection.write(bytes(msg, "utf-8"))
+                self.serial_connection.write(bytes(cmd, "utf-8"))
                 self.serial_connection.flush()
-                print("Message sent: " + msg)
+                print("Command sent: " + cmd)
             else:
                 print("Broken connection")
         except serial.SerialException as e:
             print(f"Serial communication error: {e}")
 
-    def writeAndWaitForResponse(self, msg):
-        self.write(msg)
+    def sendCommandAndAwaitResponse(self, cmd):
+        self.sendCommand(cmd)
         return self.listen();
 
     # Getters & setters

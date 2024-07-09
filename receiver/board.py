@@ -27,7 +27,7 @@ class Board:
     _POT_1_VAL = "POT1-"
     _POT_2_VAL = "POT2-"
 
-    def __init__(self):
+    def __init__(self, initialStatus=None):
         self.switch_1 = False
         self.switch_2 = False
 
@@ -40,38 +40,54 @@ class Board:
         self.pot_2 = 0
 
         self._button_handlers = {
-            self._BUTTON_1_PRIMARY: None,
-            self._BUTTON_2_PRIMARY: None,
-            self._BUTTON_3_PRIMARY: None,
-            self._BUTTON_4_PRIMARY: None,
-            self._BUTTON_1_SECONDARY: None,
-            self._BUTTON_2_SECONDARY: None,
-            self._BUTTON_3_SECONDARY: None,
-            self._BUTTON_4_SECONDARY: None
+            self._BUTTON_1_PRIMARY: self.eventNotMapped,
+            self._BUTTON_2_PRIMARY: self.eventNotMapped,
+            self._BUTTON_3_PRIMARY: self.eventNotMapped,
+            self._BUTTON_4_PRIMARY: self.eventNotMapped,
+            self._BUTTON_1_SECONDARY: self.eventNotMapped,
+            self._BUTTON_2_SECONDARY: self.eventNotMapped,
+            self._BUTTON_3_SECONDARY: self.eventNotMapped,
+            self._BUTTON_4_SECONDARY: self.eventNotMapped
         }
 
         self._switch_handlers = {
-            self._SWITCH_1_ON: None,
-            self._SWITCH_2_ON: None,
-            self._SWITCH_1_OFF: None,
-            self._SWITCH_2_OFF: None
+            self._SWITCH_1_ON: self.eventNotMapped,
+            self._SWITCH_2_ON: self.eventNotMapped,
+            self._SWITCH_1_OFF: self.eventNotMapped,
+            self._SWITCH_2_OFF: self.eventNotMapped
         }
 
         self._channel_handlers = {
-            self._CHANNEL_1_ON: None,
-            self._CHANNEL_2_ON: None,
-            self._CHANNEL_3_ON: None,
-            self._CHANNEL_4_ON: None,
-            self._CHANNEL_1_OFF: None,
-            self._CHANNEL_2_OFF: None,
-            self._CHANNEL_3_OFF: None,
-            self._CHANNEL_4_OFF: None
+            self._CHANNEL_1_ON: self.eventNotMapped,
+            self._CHANNEL_2_ON: self.eventNotMapped,
+            self._CHANNEL_3_ON: self.eventNotMapped,
+            self._CHANNEL_4_ON: self.eventNotMapped,
+            self._CHANNEL_1_OFF: self.eventNotMapped,
+            self._CHANNEL_2_OFF: self.eventNotMapped,
+            self._CHANNEL_3_OFF: self.eventNotMapped,
+            self._CHANNEL_4_OFF: self.eventNotMapped
         }
 
         self._pot_handlers = {
-            self._POT_1_VAL: None,
-            self._POT_2_VAL: None
+            self._POT_1_VAL: self.eventNotMapped,
+            self._POT_2_VAL: self.eventNotMapped
         }
+
+        if initialStatus is not None:
+            states = initialStatus.split(";")
+            self.checkSwitchEvent(states[0])
+            self.checkSwitchEvent(states[1])
+            self.checkChannelSwitchEvent(states[2])
+            self.checkChannelSwitchEvent(states[3])
+            self.checkChannelSwitchEvent(states[4])
+            self.checkChannelSwitchEvent(states[5])
+            self.checkPotChangeEvent(states[6])
+            self.checkPotChangeEvent(states[7])
+            print("Initialized board from given status")
+            print(self)
+
+    def eventNotMapped(self, event, *args):
+        print(f"Event {event} is not mapped")
 
     def __str__(self):
         return (f"Board(\n"
@@ -93,65 +109,63 @@ class Board:
 
     def checkButtonEvent(self, msg):
         if msg in self._button_handlers and self._button_handlers[msg] is not None:
-            self._button_handlers[msg]()
+            self._button_handlers[msg](msg)
 
     def checkSwitchEvent(self, msg):
         if msg == self._SWITCH_1_ON:
             self.switch_1 = True
-            self._switch_handlers[msg](True)
+            self._switch_handlers[msg](self._SWITCH_1_ON, True)
         elif msg == self._SWITCH_1_OFF:
             self.switch_1 = False
-            self._switch_handlers[msg](False)
+            self._switch_handlers[msg](self._SWITCH_1_OFF, False)
 
         if msg == self._SWITCH_2_ON:
             self.switch_2 = True
-            self._switch_handlers[msg](True)
+            self._switch_handlers[msg](self._SWITCH_2_ON, True)
         elif msg == self._SWITCH_2_OFF:
             self.switch_2 = False
-            self._switch_handlers[msg](False)
+            self._switch_handlers[msg](self._SWITCH_2_OFF, False)
 
     def checkChannelSwitchEvent(self, msg):
         if msg == self._CHANNEL_1_ON:
             self.channel_1 = True
-            self._channel_handlers[msg](True)
+            self._channel_handlers[msg](self._CHANNEL_1_ON, True)
         elif msg == self._CHANNEL_1_OFF:
             self.channel_1 = False
-            self._channel_handlers[msg](False)
+            self._channel_handlers[msg](self._CHANNEL_1_OFF, False)
 
         if msg == self._CHANNEL_2_ON:
             self.channel_2 = True
-            self._channel_handlers[msg](True)
+            self._channel_handlers[msg](self._CHANNEL_2_ON, True)
         elif msg == self._CHANNEL_2_OFF:
             self.channel_2 = False
-            self._channel_handlers[msg](False)
+            self._channel_handlers[msg](self._CHANNEL_2_OFF, False)
 
         if msg == self._CHANNEL_3_ON:
             self.channel_3 = True
-            self._channel_handlers[msg](True)
+            self._channel_handlers[msg](self._CHANNEL_3_ON, True)
         elif msg == self._CHANNEL_3_OFF:
             self.channel_3 = False
-            self._channel_handlers[msg](False)
+            self._channel_handlers[msg](self._CHANNEL_3_OFF, False)
 
         if msg == self._CHANNEL_4_ON:
             self.channel_4 = True
-            self._channel_handlers[msg](True)
+            self._channel_handlers[msg](self._CHANNEL_4_ON, True)
         elif msg == self._CHANNEL_4_OFF:
-            self._channel_handlers[msg](False)
+            self._channel_handlers[msg](self._CHANNEL_4_OFF, False)
 
     def checkPotChangeEvent(self, msg):
         if self._POT_1_VAL in msg:
             value = int(msg.split("-")[1])
             if value != self.pot_1:
                 self.pot_1 = value
-                if self._pot_handlers[self._POT_1_VAL]:
-                    self._pot_handlers[self._POT_1_VAL](value)
+                self._pot_handlers[self._POT_1_VAL](self._POT_1_VAL, value)
 
         if self._POT_2_VAL in msg:
             value = int(msg.split("-")[1])
             if value != self.pot_2:
                 self.pot_2 = value
-                if self._pot_handlers[self._POT_2_VAL]:
-                    self._pot_handlers[self._POT_2_VAL](value)
+                self._pot_handlers[self._POT_2_VAL](self._POT_2_VAL, value)
 
     # Event handler setters
     def setButtonHandler(self, button, handler):
