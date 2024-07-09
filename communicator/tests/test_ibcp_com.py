@@ -1,5 +1,4 @@
 import unittest
-import serial
 from unittest.mock import MagicMock
 from ibcp_com import IbcpCom
 

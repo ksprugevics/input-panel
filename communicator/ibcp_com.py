@@ -55,7 +55,6 @@ class IbcpCom:
         self.send_command(cmd)
         return self.listen()
 
-    # Getters & setters
     @property
     def serial_connection(self):
         """Get the serial connection."""
