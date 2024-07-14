@@ -2,6 +2,7 @@ from ibcp_com import IbcpCom
 from board import Board
 import signal
 import time
+import threading
 
 def initialize_handlers(board):
     board.set_button_handler(Board.BUTTON_1_PRIMARY, on_button_1_primary_press)
@@ -103,6 +104,15 @@ def graceful_exit(signal, frame, comms):
     del comms
     exit(0)
 
+def background_update_task(comms, board):
+    while True:
+        time.sleep(0.025)
+        message = comms.listen()
+        if message is None or not message:
+            continue
+
+        board.parse_message(message)
+
 if __name__ == "__main__":
     with IbcpCom() as comms:
         print("Waiting a bit for connection to establish...")
@@ -116,11 +126,11 @@ if __name__ == "__main__":
         initialize_handlers(board)
         print("READY...")
         
-        while True:
-            time.sleep(0.025)
-            message = comms.listen()
-            if message is None or not message:
-                continue
+        background_thread = threading.Thread(target=background_update_task, args=(comms, board))
+        background_thread.daemon = True
+        background_thread.start()
 
-            board.parse_message(message)
-            # print(board)
+        while True:
+            print("Main thread is running...")
+            print(board.pot_1)
+            time.sleep(1)
