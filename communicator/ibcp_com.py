@@ -1,14 +1,17 @@
 import serial
+import time
 
 class IbcpCom:
     """Communicator for IBCP version 0.2"""
 
-    def __init__(self, serial_port="COM3", baud_rate=9600, timeout=5):
+    def __init__(self, serial_port="COM3", baud_rate=9600, timeout=5, startup_delay=3):
         self._serial_port = serial_port
         self._baud_rate = baud_rate
         self._timeout = timeout
         self._serial_connection = None
         self.create_serial_connection()
+        print("Waiting a bit for connection to establish...")
+        time.sleep(3)
 
     def create_serial_connection(self):
         """Create the serial connection."""

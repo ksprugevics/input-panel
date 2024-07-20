@@ -1,5 +1,13 @@
+import os
+import sys
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+module_dir = os.path.join(script_dir, '../communicator')
+sys.path.append(module_dir)
+
 from ibcp_com import IbcpCom
 from board import Board
+
 import signal
 import time
 import threading
@@ -99,11 +107,6 @@ def on_pot_1_change(event, val):
 def on_pot_2_change(event, val):
     print(f"Pot 2 changed to {val}!")
 
-def graceful_exit(signal, frame, comms):
-    print("Stopping Communicator and closing serial connection...")
-    del comms
-    exit(0)
-
 def background_update_task(comms, board):
     while True:
         time.sleep(0.025)
@@ -115,9 +118,6 @@ def background_update_task(comms, board):
 
 if __name__ == "__main__":
     with IbcpCom() as comms:
-        print("Waiting a bit for connection to establish...")
-        time.sleep(3)
-        signal.signal(signal.SIGINT, lambda sig, frame: graceful_exit(sig, frame, comms))
 
         initial_status = comms.send_command_and_await_response("STATUS")
         print(f"Initial state:\n{initial_status}")

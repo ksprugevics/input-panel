@@ -1,6 +1,13 @@
 import pygame
 import math
 import pygame.locals
+import os
+import sys
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+module_dir = os.path.join(script_dir, '../communicator')
+sys.path.append(module_dir)
+
 from ibcp_com import IbcpCom
 from board import Board
 import signal
@@ -135,6 +142,17 @@ def draw(board):
 def update_button_press(nr):
     clicked_buttons.append(nr)
 
+def check_for_events():
+    try:
+        for event in pygame.event.get():
+            if event.type == pygame.locals.QUIT:
+                pygame.quit()
+                sys.exit()
+    except KeyError as e:
+        print(f"KeyError encountered: {e}")
+    except SystemError  as e:
+        print(f"SystemError encountered: {e}")
+
 def background_update_task(comms, board):
     while True:
         time.sleep(0.025)
@@ -144,17 +162,9 @@ def background_update_task(comms, board):
 
         board.parse_message(message)
 
-def graceful_exit(signal, frame, comms):
-    print("Stopping Communicator and closing serial connection...")
-    del comms
-    exit(0)
-
 if __name__ == "__main__":
 
     with IbcpCom() as comms:
-        print("Waiting a bit for connection to establish...")
-        time.sleep(3)
-        signal.signal(signal.SIGINT, lambda sig, frame: graceful_exit(sig, frame, comms))
 
         initial_status = comms.send_command_and_await_response("STATUS")
         print(f"Initial state:\n{initial_status}")
@@ -175,11 +185,7 @@ if __name__ == "__main__":
         background_thread.start()
 
         while True:
-            for event in pygame.event.get():
-                if event.type == pygame.locals.QUIT:
-                    pygame.quit()
-                    exit()
-
+            check_for_events()
             if len(clicked_buttons) != 0 and not color_change_time:
                 color_change_time = time.time()
 
