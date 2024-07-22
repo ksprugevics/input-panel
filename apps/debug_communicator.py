@@ -8,7 +8,6 @@ sys.path.append(module_dir)
 from ibcp_com import IbcpCom
 from board import Board
 
-import signal
 import time
 import threading
 

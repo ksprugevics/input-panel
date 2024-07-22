@@ -10,12 +10,9 @@ sys.path.append(nircmd_exe)
 
 from ibcp_com import IbcpCom
 from board import Board
-import signal
 import time
 import threading
-
-import win32api
-import win32con
+import pyautogui
 
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume, ISimpleAudioVolume
 from comtypes import CLSCTX_ALL, CoInitialize, CoUninitialize
@@ -27,20 +24,16 @@ PROCESS_DISCORD = "Discord.exe"
 OUT_DEVICE_MONITOR = "Monitors"
 OUT_DEVICE_HEADPHONES = "Austinas"
 
-def press_key(hexKeyCode):
-    win32api.keybd_event(hexKeyCode, 0, 0, 0)
-    win32api.keybd_event(hexKeyCode, 0, win32con.KEYEVENTF_KEYUP, 0)
-
 def play_pause(event):
-    press_key(win32con.VK_MEDIA_PLAY_PAUSE)
+    pyautogui.press("playpause")
     print("Toggled play/pause")
 
 def next_song(event):
-    press_key(win32con.VK_MEDIA_NEXT_TRACK)
+    pyautogui.press("nexttrack")
     print("Skipped to next song")
 
 def previous_song(event):
-    press_key(win32con.VK_MEDIA_PREV_TRACK)
+    pyautogui.press("prevtrack")
     print("Skipped to previous song")
 
 def change_system_volume(event, value):
@@ -133,7 +126,6 @@ if __name__ == "__main__":
     volume = cast(interface, POINTER(IAudioEndpointVolume))
 
     with IbcpCom() as comms:
-
 
         initial_status = comms.send_command_and_await_response("STATUS")
         print(f"Initial state:\n{initial_status}")
