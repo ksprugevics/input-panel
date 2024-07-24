@@ -12,57 +12,86 @@ import time
 import threading
 import pyautogui
 
-# pyautogui.hotkey('ctrl', 'shift', 'num7')
+# https://pyautogui.readthedocs.io/en/latest/keyboard.html
+B1 = "num1"
+B2 = "num2"
+B3 = "num3"
+B4 = "num4"
+
+# 5-8 activate when SW1 is on
+B5 = "num5"
+B6 = "num6"
+B7 = "num7"
+B8 = "num8"
+
+SECONDARY_BUTTON_MULTIPLIER = "ctrl"
+
+P1 = "num0"
+P2 = "num0"
+
+# 3-4 activate when SW1 is on
+P3 = "num0"
+P4 = "num0"
+
 def button1(event):
     if not board.switch_1:
-        pyautogui.press("num1")
+        pyautogui.press(B1)
     else:
-        pyautogui.press("num5")
+        pyautogui.press(B5)
 
 def button2(event):
     if not board.switch_1:
-        pyautogui.press("num2")
+        pyautogui.press(B2)
     else:
-        pyautogui.press("num6")
+        pyautogui.press(B6)
 
 def button3(event):
     if not board.switch_1:
-        pyautogui.press("num3")
+        pyautogui.press(B3)
     else:
-        pyautogui.press("num7")
+        pyautogui.press(B7)
 
 def button4(event):
     if not board.switch_1:
-        pyautogui.press("num4")
+        pyautogui.press(B4)
     else:
-        pyautogui.press("num8")
+        pyautogui.press(B8)
 
 def button1_ctrl(event):
     if not board.switch_1:
-        pyautogui.hotkey("ctrl", "num1")
+        pyautogui.hotkey(SECONDARY_BUTTON_MULTIPLIER, B1)
     else:
-        pyautogui.hotkey("ctrl", "num5")
+        pyautogui.hotkey(SECONDARY_BUTTON_MULTIPLIER, B5)
 
 def button2_ctrl(event):
     if not board.switch_1:
-        pyautogui.hotkey("ctrl", "num2")
+        pyautogui.hotkey(SECONDARY_BUTTON_MULTIPLIER, B2)
     else:
-        pyautogui.hotkey("ctrl", "num6")
+        pyautogui.hotkey(SECONDARY_BUTTON_MULTIPLIER, B6)
 
 def button3_ctrl(event):
     if not board.switch_1:
-        pyautogui.hotkey("ctrl", "num3")
+        pyautogui.hotkey(SECONDARY_BUTTON_MULTIPLIER, B3)
     else:
-        pyautogui.hotkey("ctrl", "num7")
+        pyautogui.hotkey(SECONDARY_BUTTON_MULTIPLIER, B7)
 
 def button4_ctrl(event):
     if not board.switch_1:
-        pyautogui.hotkey("ctrl", "num4")
+        pyautogui.hotkey(SECONDARY_BUTTON_MULTIPLIER, B4)
     else:
-        pyautogui.hotkey("ctrl", "num8")
+        pyautogui.hotkey(SECONDARY_BUTTON_MULTIPLIER, B8)
 
-def pot(event, val):
-    pyautogui.press("num0")
+def pot1(event, val):
+    if not board.switch_1:
+        pyautogui.press(P1)
+    else:
+        pyautogui.press(P3)
+
+def pot2(event, val):
+    if not board.switch_1:
+        pyautogui.press(P2)
+    else:
+        pyautogui.press(P4)
 
 def initialize_handlers(board):
     board.set_button_handler(Board.BUTTON_1_PRIMARY, button1)
@@ -73,7 +102,8 @@ def initialize_handlers(board):
     board.set_button_handler(Board.BUTTON_2_SECONDARY, button2_ctrl)
     board.set_button_handler(Board.BUTTON_3_SECONDARY, button3_ctrl)
     board.set_button_handler(Board.BUTTON_4_SECONDARY, button4_ctrl)
-    board.set_pot_handler(Board.POT_1_VAL, pot)
+    board.set_pot_handler(Board.POT_1_VAL, pot1)
+    board.set_pot_handler(Board.POT_2_VAL, pot2)
 
 def background_update_task(comms, board):
     while True:
